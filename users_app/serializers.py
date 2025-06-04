@@ -1,0 +1,107 @@
+from rest_framework import serializers
+from .models import  SMSVerification, User
+from doctors_app.models import Doctor
+from django.core.exceptions import ValidationError
+from django.apps import apps
+from django.utils import timezone
+
+
+class SMSVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SMSVerification
+        fields = ['email', 'code']
+        extra_kwargs = {'code': {'write_only': True}}
+
+    def validate(self, attrs):
+        if not attrs.get('email'):
+            raise ValidationError("{'email': 'Email не указан'}")
+        if not attrs.get('code'):
+            raise ValidationError("{'code': 'Код подтверждения не указан'}")
+            return attrs
+
+        try:
+            sms = SMSVerification.objects.filter(email=attrs['email'], is_used=False).latest('created_at')
+        except SMSVerification.DoesNotExist:
+            raise ValidationError("Код не найден или уже использован")
+        
+        if sms.code != code:
+            raise ValidationError("Неверный код подтверждения")
+        sms.is_used = True
+        sms.save()
+        return attrs
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
+        required = True
+
+    def validate_email_exists(self, attrs):
+        if User.objects.filter(email=attrs['email']).exists():
+            return attrs['email']
+        return attrs['email']
+
+
+# class AppointmentCreateSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(write_only=True)
+#     verification_code = serializers.CharField(write_only=True, max_length=4)
+    
+#     class Meta:
+#         model = Appointment
+#         fields = '__all__'
+#         read_only_fields = ['status']
+    
+#     def validate(self, data):
+#         # Проверка кода подтверждения
+#         verification_data = {
+#             'email': data['email'],
+#             'code': data['verification_code']
+#         }
+#         sms_serializer = SMSVerificationSerializer(data=verification_data)
+#         sms_serializer.is_valid(raise_exception=True)
+        
+#         # Проверка что пользователь существует
+#         User = apps.get_model('accounts_app.User')
+#         try:
+#             user = User.objects.get(email=data['email'])
+#         except User.DoesNotExist:
+#             raise ValidationError("Пользователь с таким email не зарегистрирован")
+        
+#         # Проверка что врач доступен в это время
+#         doctor = data['doctor']
+#         date = data['date']
+#         time = data['time']
+        
+#         if Appointment.objects.filter(
+#             doctor=doctor,
+#             date=date,
+#             time=time,
+#             status__in=['pending', 'confirmed']
+#         ).exists():
+#             raise ValidationError("Это время уже занято")
+            
+#         return data
+    
+#     def create(self, validated_data):
+#         User = apps.get_model('accounts_app.User')
+#         user = User.objects.get(email=validated_data.pop('email'))
+#         validated_data.pop('verification_code')
+        
+#         appointment = Appointment.objects.create(
+#             user=user,
+#             **validated_data
+#         )
+#         return appointment
+
+# class AppointmentSerializer(serializers.ModelSerializer):
+#     doctor_name = serializers.CharField(source='doctor.get_full_name', read_only=True)
+    
+#     class Meta:
+#         model = Appointment
+#         fields = '__all__'
+#         read_only_fields = ['created_at', 'updated_at']
+
+
+

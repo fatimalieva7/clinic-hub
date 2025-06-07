@@ -18,7 +18,7 @@ def send_code(email, code):
         send_mail(
             f'Код подтверждения для {email}',
             f'Ваш код подтверждения: {code}',
-            'asadbeklocation@yandex.ru',
+            'fatimaakbva@yandex.ru',
             [email]
         )
     except Exception as e:

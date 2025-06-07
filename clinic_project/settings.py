@@ -6,26 +6,16 @@ from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
-# Загружаем переменные из файла .env
-load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-jrs6a-fn%%=k@j%slxkx)=ukpi_^@!dnjogw$*)8ln08*8(m85'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -77,11 +67,11 @@ WSGI_APPLICATION = 'clinic_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT'),
+        'NAME': 'clinic_project',
+        'USER': 'clinic_project',
+        'PASSWORD': 'clinic_project',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -120,7 +110,7 @@ AUTH_USER_MODEL = 'users_app.User'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'users_app.User'
+
 
 
 REST_FRAMEWORK = {

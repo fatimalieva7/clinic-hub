@@ -1,4 +1,3 @@
-from rest_framework import routers
 from . import views
 from rest_framework.routers import DefaultRouter
 

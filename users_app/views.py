@@ -15,7 +15,7 @@ from .services.validate_code import code_valid
 
 
 
-class User(viewsets.ModelViewSet):
+class UserApiView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
 
@@ -37,7 +37,7 @@ class User(viewsets.ModelViewSet):
         return Response({'message': 'Код отправлен.'}, status=status.HTTP_201_CREATED)
 
 
-class SMSVerification(viewsets.ModelViewSet):
+class SMSVerificationApiView(viewsets.ModelViewSet):
     queryset = SMSVerification.objects.all()
     serializer_class = SMSVerificationSerializer
 

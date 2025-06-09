@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import os
-from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'clinic_app',
     'doctors_app',

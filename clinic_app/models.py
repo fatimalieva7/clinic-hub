@@ -30,27 +30,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class SheduleClinic(models.Model):
-    DAY_CHOICES = [
-        (0, 'Понедельник'),
-        (1, 'Вторник'),
-        (2, 'Среда'),
-        (3, 'Четверг'),
-        (4, 'Пятница'),
-        (5, 'Суббота'),
-        (6, 'Воскресенье'),
-    ]
-
-    clinic = models.ForeignKey('Clinic', on_delete=models.CASCADE, related_name='schedule', verbose_name='Клиника')
-    day_of_week = models.PositiveSmallIntegerField(choices=DAY_CHOICES, verbose_name='День недели')
-    opening_time = models.TimeField(verbose_name='Время открытия')
-    closing_time = models.TimeField(verbose_name='Время закрытия')
-
-    class Meta:
-        verbose_name = 'Расписание клиники'
-        verbose_name_plural = 'Расписания клиник'
-        unique_together = ('clinic', 'day_of_week')
-
 
 class Clinic(models.Model):
     name = models.CharField(max_length=100)
@@ -84,13 +63,26 @@ class Clinic(models.Model):
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
-    def update_rating(self):
-        reviews = self.reviews.filter(moderation_status='approved')
-        if reviews.exists():
-            avg = sum([r.rating for r in reviews]) / reviews.count()
-            self.rating = round(avg, 1)
-            super().save(update_fields=['rating'])
+class SheduleClinic(models.Model):
+    DAY_CHOICES = [
+        (0, 'Понедельник'),
+        (1, 'Вторник'),
+        (2, 'Среда'),
+        (3, 'Четверг'),
+        (4, 'Пятница'),
+        (5, 'Суббота'),
+        (6, 'Воскресенье'),
+    ]
 
+    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='schedule', verbose_name='Клиника')
+    day_of_week = models.PositiveSmallIntegerField(choices=DAY_CHOICES, verbose_name='День недели')
+    opening_time = models.TimeField(verbose_name='Время открытия')
+    closing_time = models.TimeField(verbose_name='Время закрытия')
+
+    class Meta:
+        verbose_name = 'Расписание клиники'
+        verbose_name_plural = 'Расписания клиник'
+        unique_together = ('clinic', 'day_of_week')
 
 class Service(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название услуги')
@@ -99,7 +91,7 @@ class Service(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена',validators=[MinValueValidator(0)])
     duration = models.PositiveSmallIntegerField(verbose_name='Длительность (мин)')
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='services', verbose_name='Клиника')
-    doctors = models.ManyToManyField(Doctor, related_name='services', verbose_name='Врачи', blank=True)
+    doctors = models.ForeignKey(Doctor, related_name='services', verbose_name='Врачи', on_delete=models.CASCADE, default=None, null=True, blank=True)
     image = models.ImageField(upload_to='service_image/', verbose_name='Изображение')
     is_active = models.BooleanField(default=True, verbose_name='Активна?')
     # created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
@@ -153,11 +145,11 @@ class ReviewClinic(models.Model):
         return f"Отзыв от {self.user.email} для {self.clinic.name}"
 
 class AboutClinic(models.Model):
-    title = models.CharField(_("Название клиники"), max_length=200)
-    description = models.TextField(_("Описание клиники"))
-    mission = models.TextField(_("Миссия клиники"), blank=True)
-    history = models.TextField(_("История клиники"), blank=True)
-    logo = models.ImageField(_("Логотип"), upload_to='about/logos/', blank=True, null=True)
+    title = models.CharField(verbose_name=_("Название клиники"), max_length=200)
+    description = models.TextField(verbose_name=_("Описание клиники"))
+    mission = models.TextField(verbose_name=_("Миссия клиники"), blank=True)
+    history = models.TextField(verbose_name=_("История клиники"), blank=True)
+    logo = models.ImageField(verbose_name=_("Логотип"), upload_to='about/logos/', blank=True, null=True)
     # created_at = models.DateTimeField(_("Дата создания"), auto_now_add=True)
     # updated_at = models.DateTimeField(_("Дата обновления"), auto_now=True)
 

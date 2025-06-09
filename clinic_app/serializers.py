@@ -24,12 +24,6 @@ class ReviewClinicSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['user']
 
-    def validate(self, data):
-        user = self.context['request'].user
-        if Review.objects.filter(user=user, clinic=data['clinic']).exists():
-            raise serializers.ValidationError("Вы уже оставили отзыв")
-        return data
-
 
 class ClinicAchievementSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,9 +44,7 @@ class AboutClinicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AboutClinic
-        fields =  'id', 'title', 'description', 'mission', 'history', 
-        'logo', 'logo_url', 'created_at', 'updated_at',
-        'team_members', 'achievements'
+        fields =  '__all__'
 
 
 class SheduleClinicSerializer(serializers.ModelSerializer):
@@ -60,17 +52,5 @@ class SheduleClinicSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SheduleClinic
-        fields = ['__all__']
-        extra_kwargs = {
-            'clinic': {'read_only': True}  # Если клиника устанавливается автоматически
-        }
-
-    def validate(self, data):
-        """
-        Проверка что время закрытия больше времени открытия
-        """
-        if data['opening_time'] >= data['closing_time']:
-            raise serializers.ValidationError("Время закрытия должно быть позже времени открытия")
-        return data
-
+        fields = '__all__'
 

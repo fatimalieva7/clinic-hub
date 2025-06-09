@@ -29,9 +29,6 @@ class ReviewClinicViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewClinicSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
 class AboutClinicViewSet(viewsets.ModelViewSet):
     queryset = AboutClinic.objects.all()
     serializer_class = AboutClinicSerializer
@@ -51,10 +48,3 @@ class SheduleClinicViewSet(viewsets.ModelViewSet):
     queryset = SheduleClinic.objects.all()
     serializer_class = SheduleClinicSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        clinic_id = self.request.query_params.get('clinic_id')
-        if clinic_id:
-            queryset = queryset.filter(clinic_id=clinic_id)
-        return queryset.order_by('day_of_week')

@@ -3,7 +3,7 @@ from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users_app.models import User
 from doctors_app.models import Doctor
-
+from django.utils.translation import gettext_lazy as _
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -29,6 +29,27 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+class SheduleClinic(models.Model):
+    DAY_CHOICES = [
+        (0, 'Понедельник'),
+        (1, 'Вторник'),
+        (2, 'Среда'),
+        (3, 'Четверг'),
+        (4, 'Пятница'),
+        (5, 'Суббота'),
+        (6, 'Воскресенье'),
+    ]
+
+    clinic = models.ForeignKey('Clinic', on_delete=models.CASCADE, related_name='schedule', verbose_name='Клиника')
+    day_of_week = models.PositiveSmallIntegerField(choices=DAY_CHOICES, verbose_name='День недели')
+    opening_time = models.TimeField(verbose_name='Время открытия')
+    closing_time = models.TimeField(verbose_name='Время закрытия')
+
+    class Meta:
+        verbose_name = 'Расписание клиники'
+        verbose_name_plural = 'Расписания клиник'
+        unique_together = ('clinic', 'day_of_week')
 
 
 class Clinic(models.Model):
@@ -130,5 +151,54 @@ class ReviewClinic(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.user.email} для {self.clinic.name}"
+
+class AboutClinic(models.Model):
+    title = models.CharField(_("Название клиники"), max_length=200)
+    description = models.TextField(_("Описание клиники"))
+    mission = models.TextField(_("Миссия клиники"), blank=True)
+    history = models.TextField(_("История клиники"), blank=True)
+    logo = models.ImageField(_("Логотип"), upload_to='about/logos/', blank=True, null=True)
+    # created_at = models.DateTimeField(_("Дата создания"), auto_now_add=True)
+    # updated_at = models.DateTimeField(_("Дата обновления"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("О клинике")
+        verbose_name_plural = _("О клинике")
+
+    def __str__(self):
+        return self.title
+
+
+class TeamMember(models.Model):
+    clinic = models.ForeignKey(AboutClinic, related_name='team_members', on_delete=models.CASCADE)
+    name = models.CharField(_("Имя сотрудника"), max_length=100)
+    position = models.CharField(_("Должность"), max_length=100)
+    bio = models.TextField(_("Биография"), blank=True)
+    photo = models.ImageField(_("Фото"), upload_to='about/team/', blank=True, null=True)
+    is_visible = models.BooleanField(_("Отображать на сайте"), default=True)
+    order = models.PositiveIntegerField(_("Порядок отображения"), default=0)
+
+    class Meta:
+        verbose_name = _("Сотрудник")
+        verbose_name_plural = _("Сотрудники")
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.name} - {self.position}"
+
+
+class ClinicAchievement(models.Model):
+    clinic = models.ForeignKey(AboutClinic, related_name='achievements', on_delete=models.CASCADE)
+    title = models.CharField(_("Название достижения"), max_length=200)
+    description = models.TextField(_("Описание достижения"), blank=True)
+    year = models.PositiveIntegerField(_("Год достижения"))
+    icon = models.CharField(_("Иконка"), max_length=50, blank=True)
+
+    class Meta:
+        verbose_name = _("Достижение клиники")
+        verbose_name_plural = _("Достижения клиники")
+
+    def __str__(self):
+        return f"{self.title} ({self.year})"
 
 

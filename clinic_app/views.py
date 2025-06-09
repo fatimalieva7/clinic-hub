@@ -1,37 +1,60 @@
-from rest_framework import viewsets
-from .serializers import ClinicSerializer, CategorySerializer
-from  .models import Clinic, Category, Service
-from .serializers import ServiceSerializer
-from .serializers import ReviewClinicSerializer
-from .models import ReviewClinic
-from rest_framework import permissions
+from rest_framework import viewsets, permissions
+from .models import Clinic, Category, Service, ReviewClinic, AboutClinic, TeamMember, ClinicAchievement, SheduleClinic
+from .serializers import (
+    ClinicSerializer, 
+    CategorySerializer, 
+    ServiceSerializer, 
+    ReviewClinicSerializer,
+    AboutClinicSerializer, 
+    TeamMemberSerializer,
+    ClinicAchievementSerializer, 
+    SheduleClinicSerializer
+)
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-
-
-class Category(viewsets.ModelViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class Clinic(viewsets.ModelViewSet):
+class ClinicViewSet(viewsets.ModelViewSet):
     queryset = Clinic.objects.all()
     serializer_class = ClinicSerializer
 
-class Service(viewsets.ModelViewSet):
+class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all() 
     serializer_class = ServiceSerializer
 
-    def get_serializer(self, *args, **kwargs):
-        kwargs['context'] = {
-            'request': self.request,
-            'format': self.format_kwarg,
-            'view': self
-        }
-        return super().get_serializer(*args, **kwargs)
-
-class ReviewClinic(viewsets.ModelViewSet):
+class ReviewClinicViewSet(viewsets.ModelViewSet):
     queryset = ReviewClinic.objects.all()
     serializer_class = ReviewClinicSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+class AboutClinicViewSet(viewsets.ModelViewSet):
+    queryset = AboutClinic.objects.all()
+    serializer_class = AboutClinicSerializer
+    http_method_names = ['get']
+
+class TeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.filter(is_visible=True).order_by('order')
+    serializer_class = TeamMemberSerializer
+    http_method_names = ['get']
+
+class ClinicAchievementViewSet(viewsets.ModelViewSet):
+    queryset = ClinicAchievement.objects.all()
+    serializer_class = ClinicAchievementSerializer
+    http_method_names = ['get']
+
+class SheduleClinicViewSet(viewsets.ModelViewSet):
+    queryset = SheduleClinic.objects.all()
+    serializer_class = SheduleClinicSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        clinic_id = self.request.query_params.get('clinic_id')
+        if clinic_id:
+            queryset = queryset.filter(clinic_id=clinic_id)
+        return queryset.order_by('day_of_week')

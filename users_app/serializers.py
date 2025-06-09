@@ -34,7 +34,7 @@ class SMSVerificationSerializer(serializers.ModelSerializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id','username',  'email', 'role', 'is_active', 'username'] 
         extra_kwargs = {'password': {'write_only': True}}
         required = True
 

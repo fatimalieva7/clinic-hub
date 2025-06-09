@@ -51,11 +51,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
 
     email = models.EmailField(unique=True, verbose_name='email')
+    username = models.CharField(verbose_name='Никнейм', default=None)
     is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     role = models.CharField(max_length=25, choices=USER_ROLE, default='user')
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    # REQUIRED_FIELDS = []
 
     objects = UserManager()
 
@@ -72,6 +73,7 @@ class SMSVerification(models.Model):
     code = models.CharField(max_length=4, verbose_name='Код')
     is_used = models.BooleanField(default=False, verbose_name='Использован ли код?')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Время создания кода')
+
 
     def __str__(self):
         return f'email Пользователя: {self.email} Код: {self.code}'
